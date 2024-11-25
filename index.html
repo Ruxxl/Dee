@@ -55,7 +55,7 @@
             max-width: 900px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 200px;
             gap: 20px;
             backdrop-filter: blur(5px);
             background: rgba(0, 0, 102, 0.3);
@@ -101,7 +101,6 @@
         .answers-grid {
             display: grid;
             gap: 10px;
-            grid-template-columns: 1fr;
         }
 
         .answer-button {
@@ -217,67 +216,6 @@
         .wrong-answer {
             color: #ff0000;
         }
-
-        /* Media Queries for mobile responsiveness */
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 15px;
-            }
-
-            .game-title {
-                font-size: 20px;
-            }
-
-            .start-button {
-                font-size: 18px;
-                padding: 12px 24px;
-            }
-
-            .question-container {
-                font-size: 16px;
-            }
-
-            .answer-button {
-                font-size: 14px;
-                padding: 12px;
-            }
-
-            .money-tree {
-                display: none;
-            }
-
-            .results-table {
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .game-title {
-                font-size: 18px;
-            }
-
-            .start-button {
-                font-size: 16px;
-                padding: 10px 20px;
-            }
-
-            .answer-button {
-                font-size: 14px;
-                padding: 10px;
-            }
-
-            .question-container {
-                font-size: 14px;
-            }
-
-            .money-tree {
-                display: none;
-            }
-
-            .final-results {
-                padding: 15px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -289,7 +227,7 @@
         <div class="header">
             <h1 class="game-title">Кто хочет стать миллионером?</h1>
             <div id="game-info" class="game-info">
-                <p>Вопрос <span id="question-number">1</span> из 5</p>
+                <p>Вопрос <span id="question-number">1</span> из 10</p>
                 <div class="stats">
                     Правильных ответов: <span id="correct-count">0</span>
                 </div>
@@ -310,8 +248,34 @@
     { question: 'Микроскопиялық санырауқұлақтар қандай азықтардың құрамында өседі?', correctAnswer: 'Өсімдік тектес', answers: ['Өсімдік тектес', 'Жануарлар', 'Минералды заттар', 'Су'] },
     { question: 'Санырауқұлақтардың шамамен неше түрі бар?', correctAnswer: '120 000', answers: ['120 000', '100 000', '200 000', '500 000'] },
     { question: 'Санырауқұлақ адамға қандай зиян келтіруі мүмкін?', correctAnswer: 'Буындарда ауру тудырады', answers: ['Буындарда ауру тудырады', 'Тамаққа уланғандықтан', 'Теріде дақтар пайда болады', 'Ауызда күйіктер пайда болады'] },
-    { question: 'Санырауқұлақтың улануын алдын алу үшін қандай шараларды қолдану керек?', correctAnswer: 'Тамақтарды дұрыс сақтау', answers: ['Тамақтарды дұрыс сақтау', 'Тамақты ашықта қалдыру', 'Жеңіл тамақтану', 'Табиғи тамақтарды жеу'] }
+    { question: 'Санырауқұлақтың улануын алдын алу үшін қандай шараларды қолдану керек?', correctAnswer: 'Тамақтарды дұрыс сақтау', answers: ['Тамақтарды дұрыс сақтау', 'Тамақты ашықта қалдыру', 'Жеңіл тамақтану', 'Табиғи тамақтарды жеу'] },
+    {
+        question: "Сығындыны қандай пластинканың қатысуымен афлотоксиндердің стандарттары арқылы салыстыру жұмыстары жүргізіледі?",
+        answers: ["Силуфол", "Полиэтилен", "Микрофильтр", "Хроматограф"],
+        correctAnswer: "Силуфол"
+    },
+    {
+        question: "Қандай жануарларға биоүлгі қояды?",
+        answers: ["токсикоз белгілері байқалған", "сау жануарларға", "ұйықтап жатқан жануарларға", "жас төлдерге"],
+        correctAnswer: "токсикоз белгілері байқалған"
+    },
+    {
+        question: "Токсикалық дәрежені қабыну реакциясына қанша дәрежеге бөлу арқылы анықтайды?",
+        answers: ["4 дәрежеге", "3 дәрежеге", "5 дәрежеге", "2 дәрежеге"],
+        correctAnswer: "4 дәрежеге"
+    },
+    {
+        question: "Афлотоксикоз кезінде малды сойғаннан кейін қандай мүшенің зақымдалуымен сипатталады?",
+        answers: ["Бауыр", "Өкпе", "Бүйрек", "Асқазан"],
+        correctAnswer: "Бауыр"
+    },
+    {
+        question: "Қандай жағдайда бауыр беткейінде ісік туады?",
+        answers: ["пролифтрация көп кезінде", "жарақаттану кезінде", "қоректік заттардың жетіспеушілігі кезінде", "гипоксия кезінде"],
+        correctAnswer: "пролифтрация көп кезінде"
+    },
 ];
+
 
         let currentQuestion = 0;
         let isChecking = false;
@@ -443,7 +407,7 @@
                 <div class="header">
                     <h1 class="game-title">Кто хочет стать миллионером?</h1>
                     <div id="game-info" class="game-info">
-                        <p>Вопрос <span id="question-number">1</span> из 5</p>
+                        <p>Вопрос <span id="question-number">1</span> из 10</p>
                         <div class="stats">
                             Правильных ответов: <span id="correct-count">0</span>
                         </div>
