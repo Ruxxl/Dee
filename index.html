@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кто хочет стать миллионером?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: url('https://cdn.culture.ru/images/20dc9baf-a00a-5f4c-b831-6b76775fc541') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .welcome-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .welcome-screen h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .start-button {
+            background-color: #ff6600;
+            color: white;
+            font-size: 20px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            background-color: #e55c00;
+            transform: scale(1.05);
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 102, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-info {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            font-size: 16px;
+            color: #ffd700;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .question-container {
+            background: rgba(0, 0, 153, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .answers-grid {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr;
+        }
+
+        .answer-button {
+            background: linear-gradient(to bottom, rgba(0, 0, 153, 0.8), rgba(0, 0, 102, 0.8));
+            border: 2px solid #4444ff;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+            transition: all 0.3s;
+            backdrop-filter: blur(3px);
+        }
+
+        .answer-button:hover:not(.disabled) {
+            background: linear-gradient(to bottom, rgba(0, 0, 204, 0.8), rgba(0, 0, 153, 0.8));
+            transform: scale(1.02);
+        }
+
+        .answer-button.selected {
+            background: linear-gradient(to bottom, rgba(0, 0, 255, 0.8), rgba(0, 0, 204, 0.8));
+        }
+
+        .answer-button.correct {
+            background: linear-gradient(to bottom, rgba(0, 136, 0, 0.8), rgba(0, 102, 0, 0.8));
+            border-color: #00ff00;
+        }
+
+        .answer-button.wrong {
+            background: linear-gradient(to bottom, rgba(136, 0, 0, 0.8), rgba(102, 0, 0, 0.8));
+            border-color: #ff0000;
+        }
+
+        .answer-button.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .money-tree {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .money-level {
+            padding: 8px;
+            margin: 5px 0;
+            text-align: center;
+            border-radius: 5px;
+            background: rgba(0, 0, 102, 0.6);
+        }
+
+        .money-level.current {
+            background: rgba(255, 204, 0, 0.8);
+            color: black;
+        }
+
+        .final-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .results-table {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 10px;
+            border: 1px solid #4444ff;
+            text-align: left;
+        }
+
+        .results-table th {
+            background: rgba(0, 0, 153, 0.6);
+        }
+
+        .results-table tr:nth-child(even) {
+            background: rgba(0, 0, 153, 0.2);
+        }
+
+        .restart-button {
+            background: rgba(0, 0, 204, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .restart-button:hover {
+            background: rgba(0, 0, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .correct-answer {
+            color: #00ff00;
+        }
+
+        .wrong-answer {
+            color: #ff0000;
+        }
+
+        /* Media Queries for mobile responsiveness */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+            }
+
+            .game-title {
+                font-size: 20px;
+            }
+
+            .start-button {
+                font-size: 18px;
+                padding: 12px 24px;
+            }
+
+            .question-container {
+                font-size: 16px;
+            }
+
+            .answer-button {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .money-tree {
+                display: none;
+            }
+
+            .results-table {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 18px;
+            }
+
+            .start-button {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+
+            .answer-button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .question-container {
+                font-size: 14px;
+            }
+
+            .money-tree {
+                display: none;
+            }
+
+            .final-results {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome-screen" class="welcome-screen">
+        <button class="start-button" onclick="startGame()">Ойынды бастау</button>
+    </div>
+
+    <div id="game-container" class="game-container" style="display: none;">
+        <div class="header">
+            <h1 class="game-title">Кто хочет стать миллионером?</h1>
+            <div id="game-info" class="game-info">
+                <p>Вопрос <span id="question-number">1</span> из 5</p>
+                <div class="stats">
+                    Правильных ответов: <span id="correct-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-game">
+            <div id="question-container" class="question-container"></div>
+            <div id="answers-grid" class="answers-grid"></div>
+        </div>
+
+        <div id="money-tree" class="money-tree"></div>
+    </div>
+
+    <script>
+        const questions = [
+    { question: 'Санырауқұлақ латынша қалай аталады?', correctAnswer: 'Fungi', answers: ['Fungi', 'Bacteria', 'Virus', 'Algae'] },
+    { question: 'Микроскопиялық санырауқұлақтар қандай азықтардың құрамында өседі?', correctAnswer: 'Өсімдік тектес', answers: ['Өсімдік тектес', 'Жануарлар', 'Минералды заттар', 'Су'] },
+    { question: 'Санырауқұлақтардың шамамен неше түрі бар?', correctAnswer: '120 000', answers: ['120 000', '100 000', '200 000', '500 000'] },
+    { question: 'Санырауқұлақ адамға қандай зиян келтіруі мүмкін?', correctAnswer: 'Буындарда ауру тудырады', answers: ['Буындарда ауру тудырады', 'Тамаққа уланғандықтан', 'Теріде дақтар пайда болады', 'Ауызда күйіктер пайда болады'] },
+    { question: 'Санырауқұлақтың улануын алдын алу үшін қандай шараларды қолдану керек?', correctAnswer: 'Тамақтарды дұрыс сақтау', answers: ['Тамақтарды дұрыс сақтау', 'Тамақты ашықта қалдыру', 'Жеңіл тамақтану', 'Табиғи тамақтарды жеу'] }
+];
+
+        let currentQuestion = 0;
+        let isChecking = false;
+        let correctAnswers = 0;
+        let userAnswers = [];
+
+        function startGame() {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'grid';
+            initGame();
+        }
+
+        function initGame() {
+            displayQuestion();
+            updateGameInfo();
+        }
+
+        function displayQuestion() {
+            const questionContainer = document.getElementById('question-container');
+            const answersGrid = document.getElementById('answers-grid');
+            
+            questionContainer.textContent = questions[currentQuestion].question;
+            answersGrid.innerHTML = '';
+
+            // Случайным образом перемешиваем ответы
+            const shuffledAnswers = [...questions[currentQuestion].answers];
+            shuffledAnswers.sort(() => Math.random() - 0.5);
+
+            shuffledAnswers.forEach((answer, index) => {
+                const button = document.createElement('button');
+                button.className = 'answer-button';
+                button.textContent = `${['A', 'B', 'C', 'D'][index]}: ${answer}`;
+                button.onclick = () => handleAnswer(answer, button);
+                answersGrid.appendChild(button);
+            });
+        }
+
+        function updateGameInfo() {
+            document.getElementById('question-number').textContent = currentQuestion + 1;
+            document.getElementById('correct-count').textContent = correctAnswers;
+        }
+
+        function handleAnswer(answer, button) {
+            if (isChecking) return;
+            isChecking = true;
+
+            document.querySelectorAll('.answer-button').forEach(btn => {
+                btn.classList.add('disabled');
+            });
+
+            button.classList.add('selected');
+            const correct = answer === questions[currentQuestion].correctAnswer;
+            
+            userAnswers.push({
+                question: questions[currentQuestion].question,
+                userAnswer: answer,
+                correctAnswer: questions[currentQuestion].correctAnswer,
+                isCorrect: correct
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll('.answer-button').forEach(btn => {
+                    if (btn.textContent.includes(questions[currentQuestion].correctAnswer)) {
+                        btn.classList.add('correct');
+                    }
+                });
+                
+                if (!correct) {
+                    button.classList.add('wrong');
+                } else {
+                    correctAnswers++;
+                }
+
+                setTimeout(() => {
+                    if (currentQuestion === questions.length - 1) {
+                        showResults();
+                    } else {
+                        currentQuestion++;
+                        isChecking = false;
+                        displayQuestion();
+                        updateGameInfo();
+                    }
+                }, 1500);
+            }, 1000);
+        }
+
+        function showResults() {
+            const gameContainer = document.getElementById('game-container');
+            const resultsHtml = `
+                <div class="final-results">
+                    <h2>Результаты теста</h2>
+                    <h3>Правильных ответов: ${correctAnswers} из ${questions.length}</h3>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Вопрос</th>
+                                <th>Ваш ответ</th>
+                                <th>Правильный ответ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${userAnswers.map((answer, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${answer.question}</td>
+                                    <td class="${answer.isCorrect ? 'correct-answer' : 'wrong-answer'}">
+                                        ${answer.userAnswer}
+                                    </td>
+                                    <td>${answer.correctAnswer}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <button class="restart-button" onclick="restartGame()">Начать заново</button>
+                </div>
+            `;
+            gameContainer.innerHTML = resultsHtml;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            isChecking = false;
+            correctAnswers = 0;
+            userAnswers = [];
+            
+            const gameContainer = document.getElementById('game-container');
+            gameContainer.innerHTML = `
+                <div class="header">
+                    <h1 class="game-title">Кто хочет стать миллионером?</h1>
+                    <div id="game-info" class="game-info">
+                        <p>Вопрос <span id="question-number">1</span> из 5</p>
+                        <div class="stats">
+                            Правильных ответов: <span id="correct-count">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="main-game">
+                    <div id="question-container" class="question-container"></div>
+                    <div id="answers-grid" class="answers-grid"></div>
+                </div>
+                <div id="money-tree" class="money-tree"></div>
+            `;
+            
+            initGame();
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
