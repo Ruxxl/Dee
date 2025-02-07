@@ -1,444 +1,441 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кто хочет стать миллионером?</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
             font-family: Arial, sans-serif;
         }
 
-        body {
-            background: url('https://cdn.culture.ru/images/20dc9baf-a00a-5f4c-b831-6b76775fc541') no-repeat center center fixed;
-            background-size: cover;
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-            text-align: center;
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 20px;
         }
 
-        .welcome-screen {
+        .wheel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #333;
+            transition: transform 3s cubic-bezier(0.2, 0.8, 0.3, 1);
+            background: #fff;
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 2px;
+            background: #333;
+            left: 50%;
+            top: 50%;
+            transform-origin: left;
+        }
+
+        .segment-label {
+            position: absolute;
+            left: 75%;
+            top: -10px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-        }
-
-        .welcome-screen h1 {
-            font-size: 40px;
-            margin-bottom: 20px;
-        }
-
-        .start-button {
-            background-color: #ff6600;
+            justify-content: center;
+            font-weight: bold;
             color: white;
+        }
+
+        .segment-label.normal {
+            background: #4A90E2;
+        }
+
+        .segment-label.special {
+            background: #FF6B6B;
             font-size: 20px;
-            padding: 15px 30px;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #FF4444;
+            z-index: 10;
+        }
+
+        .spin-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #4A90E2;
+            color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .start-button:hover {
-            background-color: #e55c00;
-            transform: scale(1.05);
+        .spin-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
-        .game-container {
-            max-width: 900px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 200px;
-            gap: 20px;
-            backdrop-filter: blur(5px);
-            background: rgba(0, 0, 102, 0.3);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        .question-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
         }
 
-        .header {
-            text-align: center;
-            grid-column: 1 / -1;
-            padding: 20px;
-        }
-
-        .game-title {
-            font-size: 24px;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .game-info {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
-        .stats {
-            font-size: 16px;
-            color: #ffd700;
-            margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .question-container {
-            background: rgba(0, 0, 153, 0.8);
+        .modal-content {
+            background: white;
             padding: 20px;
             border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
         }
 
-        .answers-grid {
+        .answers {
             display: grid;
             gap: 10px;
+            margin-top: 20px;
         }
 
         .answer-button {
-            background: linear-gradient(to bottom, rgba(0, 0, 153, 0.8), rgba(0, 0, 102, 0.8));
-            border: 2px solid #4444ff;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 10px;
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            background: white;
             cursor: pointer;
-            font-size: 16px;
-            text-align: left;
             transition: all 0.3s;
-            backdrop-filter: blur(3px);
         }
 
-        .answer-button:hover:not(.disabled) {
-            background: linear-gradient(to bottom, rgba(0, 0, 204, 0.8), rgba(0, 0, 153, 0.8));
-            transform: scale(1.02);
-        }
-
-        .answer-button.selected {
-            background: linear-gradient(to bottom, rgba(0, 0, 255, 0.8), rgba(0, 0, 204, 0.8));
+        .answer-button:hover {
+            background: #4A90E2;
+            color: white;
         }
 
         .answer-button.correct {
-            background: linear-gradient(to bottom, rgba(0, 136, 0, 0.8), rgba(0, 102, 0, 0.8));
-            border-color: #00ff00;
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
         }
 
-        .answer-button.wrong {
-            background: linear-gradient(to bottom, rgba(136, 0, 0, 0.8), rgba(102, 0, 0, 0.8));
-            border-color: #ff0000;
+        .answer-button.incorrect {
+            background: #FF4444;
+            color: white;
+            border-color: #FF4444;
         }
 
-        .answer-button.disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .money-tree {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 10px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-        }
-
-        .money-level {
-            padding: 8px;
-            margin: 5px 0;
-            text-align: center;
-            border-radius: 5px;
-            background: rgba(0, 0, 102, 0.6);
-        }
-
-        .money-level.current {
-            background: rgba(255, 204, 0, 0.8);
-            color: black;
-        }
-
-        .final-results {
-            text-align: center;
-            grid-column: 1 / -1;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-
-        .results-table {
-            margin: 20px auto;
-            width: 100%;
-            max-width: 600px;
-            border-collapse: collapse;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .results-table th,
-        .results-table td {
-            padding: 10px;
-            border: 1px solid #4444ff;
-            text-align: left;
-        }
-
-        .results-table th {
-            background: rgba(0, 0, 153, 0.6);
-        }
-
-        .results-table tr:nth-child(even) {
-            background: rgba(0, 0, 153, 0.2);
-        }
-
-        .restart-button {
-            background: rgba(0, 0, 204, 0.8);
+        .close-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #4A90E2;
             color: white;
             border: none;
-            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        .result-message {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .special-question {
+            background: #FF6B6B !important;
+            border-color: #FF6B6B !important;
+        }
+
+        .stats-table {
+            margin-top: 30px;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .stats-table th {
+            background: #4A90E2;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stats-table td {
             font-size: 16px;
-            margin-top: 20px;
-            transition: all 0.3s;
         }
 
-        .restart-button:hover {
-            background: rgba(0, 0, 255, 0.8);
-            transform: scale(1.05);
+        .correct-count {
+            color: #4CAF50;
+            font-weight: bold;
         }
 
-        .correct-answer {
-            color: #00ff00;
+        .incorrect-count {
+            color: #FF4444;
+            font-weight: bold;
         }
 
-        .wrong-answer {
-            color: #ff0000;
+        .total-count {
+            font-weight: bold;
+            color: #4A90E2;
+        }
+
+        .stats-percentage {
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <div id="welcome-screen" class="welcome-screen">
-        <button class="start-button" onclick="startGame()">Ойынды бастау</button>
+    <div class="container">
+        <!-- Барабан -->
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+        <button class="spin-button" id="spinButton">Крутить барабан</button>
+
+        <!-- Таблица статистики -->
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Правильные</th>
+                    <th>Неправильные</th>
+                    <th>Всего вопросов</th>
+                    <th>Процент правильных</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="correct-count" id="correctCount">0</td>
+                    <td class="incorrect-count" id="incorrectCount">0</td>
+                    <td class="total-count" id="totalCount">0</td>
+                    <td class="stats-percentage" id="correctPercentage">0%</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div id="game-container" class="game-container" style="display: none;">
-        <div class="header">
-            <h1 class="game-title">Кто хочет стать миллионером?</h1>
-            <div id="game-info" class="game-info">
-                <p>Вопрос <span id="question-number">1</span> из 13</p>
-                <div class="stats">
-                    Правильных ответов: <span id="correct-count">0</span>
-                </div>
-            </div>
+    <!-- Модальное окно с вопросами -->
+    <div class="question-modal" id="questionModal">
+        <div class="modal-content">
+            <h2 id="questionTitle">Вопрос</h2>
+            <p id="questionText"></p>
+            <div class="answers" id="answers"></div>
+            <div class="result-message" id="resultMessage"></div>
+            <button class="close-button" id="closeButton">Закрыть</button>
         </div>
-
-        <div class="main-game">
-            <div id="question-container" class="question-container"></div>
-            <div id="answers-grid" class="answers-grid"></div>
-        </div>
-
-        <div id="money-tree" class="money-tree"></div>
     </div>
 
     <script>
-        const questions = [
-    { question: 'Санырауқұлақ латынша қалай аталады?', correctAnswer: 'Fungi', answers: ['Fungi', 'Bacteria', 'Virus', 'Algae'] },
-    { question: 'Микроскопиялық санырауқұлақтар қандай азықтардың құрамында өседі?', correctAnswer: 'Өсімдік тектес', answers: ['Өсімдік тектес', 'Жануарлар', 'Минералды заттар', 'Су'] },
-    { question: 'Санырауқұлақтардың шамамен неше түрі бар?', correctAnswer: '120 000', answers: ['120 000', '100 000', '200 000', '500 000'] },
-    { question: 'Санырауқұлақ адамға қандай зиян келтіруі мүмкін?', correctAnswer: 'Буындарда ауру тудырады', answers: ['Буындарда ауру тудырады', 'Тамаққа уланғандықтан', 'Теріде дақтар пайда болады', 'Ауызда күйіктер пайда болады'] },
-    { question: 'Санырауқұлақтың улануын алдын алу үшін қандай шараларды қолдану керек?', correctAnswer: 'Тамақтарды дұрыс сақтау', answers: ['Тамақтарды дұрыс сақтау', 'Тамақты ашықта қалдыру', 'Жеңіл тамақтану', 'Табиғи тамақтарды жеу'] },
-    {
-        question: "Сығындыны қандай пластинканың қатысуымен афлотоксиндердің стандарттары арқылы салыстыру жұмыстары жүргізіледі?",
-        answers: ["Силуфол", "Полиэтилен", "Микрофильтр", "Хроматограф"],
-        correctAnswer: "Силуфол"
-    },
-    {
-        question: "Қандай жануарларға биоүлгі қояды?",
-        answers: ["Токсикоз белгілері байқалған", "Сау жануарларға", "ұйықтап жатқан жануарларға", "Жас төлдерге"],
-        correctAnswer: "токсикоз белгілері байқалған"
-    },
-    {
-        question: "Токсикалық дәрежені қабыну реакциясына қанша дәрежеге бөлу арқылы анықтайды?",
-        answers: ["4 дәрежеге", "3 дәрежеге", "5 дәрежеге", "2 дәрежеге"],
-        correctAnswer: "4 дәрежеге"
-    },
-    {
-        question: "Афлотоксикоз кезінде малды сойғаннан кейін қандай мүшенің зақымдалуымен сипатталады?",
-        answers: ["Бауыр", "Өкпе", "Бүйрек", "Асқазан"],
-        correctAnswer: "Бауыр"
-    },
-    {
-        question: "Қандай жағдайда бауыр беткейінде ісік туады?",
-        answers: ["Пролифтрация көп кезінде", "Жарақаттану кезінде", "қоректік заттардың жетіспеушілігі кезінде", "Гипоксия кезінде"],
-        correctAnswer: "пролиферация көп кезінде"
-    },
-    {
-        question: "Афлотоксиннің тағам өнімдерінде рұқсат етілген концентрациясы қандай?",
-        answers: ["5 мг/ кг", "10 мг/ кг", "15 мг/ кг", "1 мг/ кг"],
-        correctAnswer: "5 мг/ кг"
-    },
-    {
-        question: "Афлотоксиндерге қандай орта ынғайлы болып есептеледі?",
-        answers: ["Ылғалдылығы жоғары орта", "Төмен температуралы орта", "Жарық көп орта", "Құрғақ ауа райы"],
-        correctAnswer: "Ылғалдылығы жоғары орта"
-    },
-    {
-        question: "Либерман-Бурхард реакциясын жүргізген кезде, улы зат болған жағдайда қандай ерекшелік пайда болады?",
-        answers: ["Жасыл түсті сақина пайда болады", "Қызыл түсті сақина пайда болады", "Көк түсті сақина пайда болады", "Сары түсті сақина пайда болады"],
-        correctAnswer: "Жасыл түсті сақина пайда болады"
-    }
-];
+        const normalQuestions = [
+            {
+                question: "Азот қосылыстарының әсерінен қандай ағза жүйесі әлсіреуі мүмкін?",
+                answers: ["Жүйке жүйесі", "Тыныс алу жүйесі", "Тыныс алу жүйесі", "Тыныс алу жүйесі"],
+                correct: 1
+            },
+            {
+                question: "Азот қосылыстарының қоршаған ортаға әсері қандай болуы мүмкін?",
+                answers: ["Атмосфераның ластануы", "Су көздерінің ластануы", "Су көздерінің ластануы", "Барлығы"],
+                correct: 0
+            },
+            {
+                question: "Азот қосылыстарының адам ағзасына әсерін азайту үшін қандай шаралар қабылдануы керек?",
+                answers: ["Өнеркәсіптік шығарындыларды азайту", "Азот қышқылын қолдану", "Азот қышқылын қолдану", "Азот қышқылын қолдану"],
+                correct: 0
+            },
+            {
+                question: "Қайда азот қосылыстары көп мөлшерде кездеседі?",
+                answers: ["Таулы аймақтарда", "Қалалық аумақтарда", "Сумен ластанған жерлерде", "Орманды аймақтарда"],
+                correct: 1
+            },
+            {
+                question: "Азот қосылыстарынан қорғану үшін қай әдіс тиімді?",
+                answers: ["Химиялық қосылыстарды ішпеу  ", "Жаңа технологияларды қолдану", "Жұмсақ азық-түліктерді пайдалану", "Жұмсақ азық-түліктерді пайдалану"],
+                correct: 1
+            },
+            {
+                question: "Азот қосылыстарының ағзаға әсерін анықтау үшін қандай зерттеу әдістері қолданылуы мүмкін?",
+                answers: ["Биохимиялық зерттеулер", "Биохимиялық зерттеулер", "Токсикологиялық зерттеулер", "Барлығы"],
+                correct: 3
+            },
+            {
+                question: "Азот қосылыстарының әсерінен адам ағзасында қандай реакциялар болуы мүмкін?",
+                answers: ["Қышқылдық теңгерімнің өзгеруі", "Иммунитеттің әлсіреуі", "Иммунитеттің әлсіреуі", "Барлығы"],
+                correct: 3
+            },
+            {
+                question: "Қаншалықты көп азот қосылыстары адам ағзасына зиянды әсер етеді?",
+                answers: ["Әрбір адамға бірдей әсер етеді", "Көп мөлшерде және ұзақ әсер етуі керек", "Тек белгілі бір жас топтарына әсер етеді", "Әсер етпейді"],
+                correct: 1
+            }
+        ];
 
+        const specialQuestions = [
+            {
+                question: "АРНАЙЫ СҰРАҚ: Азот қосылыстары тағамда қандай қауіптер тудыруы мүмкін?",
+                answers: ["Тағамның дәмін жақсартады", " Токсикалық әсер етуі мүмкін", "Пайдалы қасиеттерін арттырады", "Барлық жауаптар дұрыс"],
+                correct: 1,
+                special: true
+            },
+            {
+                question: "АРНАЙЫ СҰРАҚ: ⁠Азот қосылыстарының жоғары деңгейі тағам өнімдерінде қандай ауруларға әкелуі мүмкін?",
+                answers: ["Бүйрек аурулары", "Асқазан жарасы", "Қан қысымының жоғарылауы", "Азық-түлік токсикозы"],
+                correct: 3,
+                special: true
+            },
+            {
+                question: "АРНАЙЫ СҰРАҚ: Азот қосылыстарының тағамда көбеюіне қандай факторлар ықпал етеді?",
+                answers: ["Қоршаған ортадағы температураның төмендеуі", "Тағамның дұрыс сақталмауы", "Химиялық өңдеу әдістері", "Құрамындағы кальцийдің көптігі"],
+                correct: 1,
+                special: true
+            }
+        ];
 
-        let currentQuestion = 0;
-        let isChecking = false;
-        let correctAnswers = 0;
-        let userAnswers = [];
+        const specialSegments = [2, 5, 8];
+        let stats = {
+            correct: 0,
+            incorrect: 0,
+            total: 0
+        };
 
-        function startGame() {
-            document.getElementById('welcome-screen').style.display = 'none';
-            document.getElementById('game-container').style.display = 'grid';
-            initGame();
-        }
+        const wheel = document.getElementById('wheel');
+        const spinButton = document.getElementById('spinButton');
+        const questionModal = document.getElementById('questionModal');
+        const questionTitle = document.getElementById('questionTitle');
+        const questionText = document.getElementById('questionText');
+        const answersContainer = document.getElementById('answers');
+        const resultMessage = document.getElementById('resultMessage');
+        const closeButton = document.getElementById('closeButton');
 
-        function initGame() {
-            displayQuestion();
-            updateGameInfo();
-        }
-
-        function displayQuestion() {
-            const questionContainer = document.getElementById('question-container');
-            const answersGrid = document.getElementById('answers-grid');
+        // Создаем сегменты колеса
+        for (let i = 0; i < 10; i++) {
+            const segment = document.createElement('div');
+            segment.className = 'segment';
+            segment.style.transform = `rotate(${i * 36}deg)`;
             
-            questionContainer.textContent = questions[currentQuestion].question;
-            answersGrid.innerHTML = '';
+            const label = document.createElement('div');
+            label.className = specialSegments.includes(i) ? 'segment-label special' : 'segment-label normal';
+            label.textContent = specialSegments.includes(i) ? '?' : (i + 1);
+            
+            segment.appendChild(label);
+            wheel.appendChild(segment);
+        }
 
-            // Случайным образом перемешиваем ответы
-            const shuffledAnswers = [...questions[currentQuestion].answers];
-            shuffledAnswers.sort(() => Math.random() - 0.5);
+        let isSpinning = false;
+        let currentRotation = 0;
 
-            shuffledAnswers.forEach((answer, index) => {
+        function updateStats(isCorrect) {
+            if (isCorrect) {
+                stats.correct++;
+            } else {
+                stats.incorrect++;
+            }
+            stats.total++;
+
+            document.getElementById('correctCount').textContent = stats.correct;
+            document.getElementById('incorrectCount').textContent = stats.incorrect;
+            document.getElementById('totalCount').textContent = stats.total;
+            
+            const percentage = (stats.correct / stats.total * 100).toFixed(1);
+            document.getElementById('correctPercentage').textContent = `${percentage}%`;
+        }
+
+        spinButton.addEventListener('click', () => {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            spinButton.disabled = true;
+            resultMessage.textContent = '';
+            
+            const spins = 2 + Math.random() * 3;
+            const randomSegment = Math.floor(Math.random() * 10);
+            const totalRotation = (spins * 360) + (randomSegment * 36);
+            
+            currentRotation += totalRotation;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+            
+            setTimeout(() => {
+                isSpinning = false;
+                spinButton.disabled = false;
+                showQuestion(randomSegment);
+            }, 3000);
+        });
+
+        function showQuestion(segmentIndex) {
+            let question;
+            
+            if (specialSegments.includes(segmentIndex)) {
+                const randomSpecialIndex = Math.floor(Math.random() * specialQuestions.length);
+                question = specialQuestions[randomSpecialIndex];
+            } else {
+                const normalIndex = segmentIndex - specialSegments.filter(s => s < segmentIndex).length;
+                question = normalQuestions[normalIndex];
+            }
+
+            questionTitle.textContent = `Вопрос ${segmentIndex + 1}`;
+            questionText.textContent = question.question;
+            answersContainer.innerHTML = '';
+            
+            question.answers.forEach((answer, index) => {
                 const button = document.createElement('button');
                 button.className = 'answer-button';
-                button.textContent = `${['A', 'B', 'C', 'D'][index]}: ${answer}`;
-                button.onclick = () => handleAnswer(answer, button);
-                answersGrid.appendChild(button);
-            });
-        }
-
-        function updateGameInfo() {
-            document.getElementById('question-number').textContent = currentQuestion + 1;
-            document.getElementById('correct-count').textContent = correctAnswers;
-        }
-
-        function handleAnswer(answer, button) {
-            if (isChecking) return;
-            isChecking = true;
-
-            document.querySelectorAll('.answer-button').forEach(btn => {
-                btn.classList.add('disabled');
-            });
-
-            button.classList.add('selected');
-            const correct = answer === questions[currentQuestion].correctAnswer;
-            
-            userAnswers.push({
-                question: questions[currentQuestion].question,
-                userAnswer: answer,
-                correctAnswer: questions[currentQuestion].correctAnswer,
-                isCorrect: correct
-            });
-
-            setTimeout(() => {
-                document.querySelectorAll('.answer-button').forEach(btn => {
-                    if (btn.textContent.includes(questions[currentQuestion].correctAnswer)) {
-                        btn.classList.add('correct');
+                if (question.special) {
+                    button.classList.add('special-question');
+                }
+                button.textContent = answer;
+                
+                button.addEventListener('click', () => {
+                    const buttons = answersContainer.getElementsByClassName('answer-button');
+                    Array.from(buttons).forEach(btn => btn.disabled = true);
+                    
+                    const isCorrect = index === question.correct;
+                    if (isCorrect) {
+                        button.classList.add('correct');
+                        resultMessage.textContent = '✅ Правильно!';
+                    } else {
+                        button.classList.add('incorrect');
+                        buttons[question.correct].classList.add('correct');
+                        resultMessage.textContent = '❌ Неправильно!';
                     }
+                    
+                    updateStats(isCorrect);
                 });
                 
-                if (!correct) {
-                    button.classList.add('wrong');
-                } else {
-                    correctAnswers++;
-                }
-
-                setTimeout(() => {
-                    if (currentQuestion === questions.length - 1) {
-                        showResults();
-                    } else {
-                        currentQuestion++;
-                        isChecking = false;
-                        displayQuestion();
-                        updateGameInfo();
-                    }
-                }, 1500);
-            }, 1000);
-        }
-
-        function showResults() {
-            const gameContainer = document.getElementById('game-container');
-            const resultsHtml = `
-                <div class="final-results">
-                    <h2>Результаты теста</h2>
-                    <h3>Правильных ответов: ${correctAnswers} из ${questions.length}</h3>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Вопрос</th>
-                                <th>Ваш ответ</th>
-                                <th>Правильный ответ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${userAnswers.map((answer, index) => `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${answer.question}</td>
-                                    <td class="${answer.isCorrect ? 'correct-answer' : 'wrong-answer'}">
-                                        ${answer.userAnswer}
-                                    </td>
-                                    <td>${answer.correctAnswer}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <button class="restart-button" onclick="restartGame()">Начать заново</button>
-                </div>
-            `;
-            gameContainer.innerHTML = resultsHtml;
-        }
-
-        function restartGame() {
-            currentQuestion = 0;
-            isChecking = false;
-            correctAnswers = 0;
-            userAnswers = [];
+                answersContainer.appendChild(button);
+            });
             
-            const gameContainer = document.getElementById('game-container');
-            gameContainer.innerHTML = `
-                <div class="header">
-                    <h1 class="game-title">Кто хочет стать миллионером?</h1>
-                    <div id="game-info" class="game-info">
-                        <p>Вопрос <span id="question-number">1</span> из 13</p>
-                        <div class="stats">
-                            Правильных ответов: <span id="correct-count">0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="main-game">
-                    <div id="question-container" class="question-container"></div>
-                    <div id="answers-grid" class="answers-grid"></div>
-                </div>
-                <div id="money-tree" class="money-tree"></div>
-            `;
-            
-            initGame();
+            questionModal.style.display = 'flex';
         }
 
-        initGame();
+        closeButton.addEventListener('click', () => {
+            questionModal.style.display = 'none';
+            resultMessage.textContent = '';
+        });
     </script>
 </body>
 </html>
